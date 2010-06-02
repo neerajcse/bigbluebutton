@@ -106,6 +106,8 @@ package org.bigbluebutton.modules.chat.services
 				),//new Responder
 				message
 			); //_netConnection.call
+			
+			
 		}
 		
 		/**

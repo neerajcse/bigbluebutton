@@ -5,9 +5,16 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import mx.controls.Button;
 			
 			import org.bigbluebutton.modules.chat.events.ChatOptionsEvent;
+			
+			import be.boulevart.google.ajaxapi.translation.data.GoogleLanguageDetectionResult;
+			import be.boulevart.google.events.GoogleApiEvent;
+			import be.boulevart.google.ajaxapi.translation.data.GoogleTranslationResult;
+			import be.boulevart.google.ajaxapi.translation.GoogleTranslation;
+			
 			
 			public var read:Boolean = true;
 			public var participantLoggedOut:Boolean = false;
@@ -15,13 +22,35 @@
 			[Bindable]
 			private var backgroundColor:uint = 0x000000;
 			
+			private var textColor:String="";
+			private var username:String="";
+			private var time:String="";
+			
+			
 			private function updateScroll():void{
 				txtChatBox.verticalScrollPosition = txtChatBox.maxVerticalScrollPosition;
 			}
 			
 			public function showNewMessage(message:String):void
 			{
-				txtChatBox.htmlText += message;
+				var arr:Array=message.split("|");
+				var g:GoogleTranslation=new GoogleTranslation();
+				g.addEventListener(GoogleApiEvent.TRANSLATION_RESULT,appendText);
+				this.textColor=arr[0].toString();
+				this.username=arr[1].toString();
+				this.time=arr[2].toString();
+				//event.color + "|" +attributes.username +"|"+ event.time + "|" + event.message + "|"+src.language+"|"+dst.lang;
+				g.translate(arr[3],arr[4],arr[5]);
+				//txtChatBox.htmlText += message;
+				
+			}
+			
+			private function appendText(e:GoogleApiEvent):void
+			{
+				txtChatBox.htmlText +="<font color=\"#" + this.textColor + "\"><b>[" +this.username +" - "+ this.time + "]</b> " + (e.data as GoogleTranslationResult).result + "</font><br/>"; ;
+				var al:Alert;
+				
+				//Alert.show( (e.data as GoogleTranslationResult).result);
 			}
 			
 			public function setMessageUnread():void{

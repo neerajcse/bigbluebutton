@@ -65,6 +65,126 @@
 				'0x88FF00', '0x00FF00', '0x00FF88', '0x00FFFF', 
 				'0x0088FF', '0x0000FF', '0x8800FF', '0xFF00FF'];
 			
+			
+				private var currentLangCode:String="";
+				
+				
+				private var langNames:Array=['Auto', 
+										  'AFRIKAANS' , 
+	  									  'ALBANIAN' , 
+	  									  'ARABIC' , 
+	  									  'BELARUSIAN' , 
+										  'BULGARIAN' , 
+										  'CATALAN' , 
+										  'CHINESE' , 
+										  'CHINESE_SIMPLIFIED' , 
+										  'CHINESE_TRADITIONAL' , 
+										  'CZECH' ,  
+										  'DANISH' , 
+										  'DUTCH',   
+										  'ENGLISH' , 
+										  'ESTONIAN' , 
+										  'FILIPINO' , 
+										  'FINNISH' , 
+										  'FRENCH' ,  
+										  'GALICIAN' , 
+										  'GERMAN' , 
+										  'GREEK' , 
+										  'HEBREW' , 
+										  'HINDI' , 
+										  'HUNGARIAN' , 
+										  'ICELANDIC' , 
+										  'INDONESIAN' , 
+										  'IRISH' , 
+										  'ITALIAN' , 
+										  'JAPANESE' , 
+										  'KOREAN' , 
+										  'LATVIAN' , 
+										  'LITHUANIAN' , 
+										  'MACEDONIAN' , 
+										  'MALAY' , 
+										  'MALTESE' , 
+										  'NORWEGIAN' , 
+										  'PERSIAN' , 
+										  'POLISH' , 
+										  'PORTUGUESE' , 
+										  'ROMANIAN' , 
+										  'RUSSIAN' , 
+										  'SERBIAN' , 
+										  'SLOVAK' , 
+										  'SLOVENIAN' , 
+										  'SPANISH' , 
+										  'SWAHILI' , 
+										  'SWEDISH' , 
+										  'THAI' , 
+										  'TURKISH' , 
+										  'UKRAINIAN' , 
+										  'VIETNAMESE' , 
+										  'WELSH' ,  
+										  'YIDDISH' ]  ;
+										  
+				private var langCodes:Array=['auto',
+										  'af', 
+	  									  'sq', 
+	  									  'ar', 
+	  									  'be', 
+										  'bg', 
+										  'ca', 
+										  'zh', 
+										  'zh-CN', 
+										  'zh-TW', 
+										  'cs', 
+										  'da', 
+										  'nl',   
+										  'en', 
+										  'et', 
+										  'tl', 
+										  'fi', 
+										  'fr', 
+										  'gl', 
+										  'de', 
+										  'el', 
+										  'iw', 
+										  'hi', 
+										  'hu', 
+										  'is', 
+										  'id', 
+										  'ga', 
+										  'it', 
+										  'ja', 
+										  'ko', 
+										  'lv', 
+										  'lt', 
+										  'mk', 
+										  'ms', 
+										  'mt', 
+										  'no', 
+										  'fa', 
+										  'pl', 
+										  'pt-PT', 
+										  'ro', 
+										  'ru', 
+										  'sr', 
+										  'sk', 
+										  'sl', 
+										  'es', 
+										  'sw', 
+										  'sv', 
+										  'th', 
+										  'tr', 
+										  'uk', 
+										  'vi', 
+										  'cy', 
+										  'yi']  ;
+										  
+
+
+
+
+
+
+			
+			
 			private static const PUBLIC_CHAT_USERID:String = '0';
 			private static const PUBLIC_CHAT_USERNAME:String = ResourceUtil.getInstance().getString("bbb.chat.publicChatUsername");
 			
@@ -229,6 +349,7 @@
 				publicEvent.message = parseURLs(cleanup(txtMsg.text));
 				publicEvent.color = cmpColorPicker.selectedColor.toString(16);
 				publicEvent.time = currentTime();
+				publicEvent.language=this.currentLangCode;
 				localDispatcher.dispatchEvent(publicEvent);
 			}
 			
@@ -404,7 +525,7 @@
 				}
 				
 				chatBox = getChatBoxForParticipant(sender);
-				chatBox.showNewMessage(message);
+				chatBox.showNewMessage(message+"|"+this.currentLangCode);
 				
 				if (! isChatBoxCurrentlySelected(sender)) {
 					notifyParticipantOfUnreadMessageFrom(sender);
@@ -449,6 +570,15 @@
 				this.enableSmileys=!this.enableSmileys;
 			}
 			
+			private function changeLanguage():void
+			{
+				
+				this.currentLangCode=this.langCodes[this.langComboBox.selectedIndex].toString();
+				Alert.show(this.currentLangCode);
+				
+			}
+			
+			
 		]]>
 	</mx:Script>
 	<containers:SuperTabNavigator id="chatTabs" width="100%" height="80%" change="onTabNavChange()" tabClose="onTabClose(event)" minTabWidth="20" 
@@ -466,9 +596,9 @@
 						   toolTip="{ResourceUtil.getInstance().getString('bbb.chat.sendBtn.toolTip')}" click="sendMessages()"/>
 			</mx:HBox>
 			<mx:HBox width="100%">
-				<mx:CheckBox label="Enable Smileys" change="toggleSmileys()" />
-				<mx:ComboBox dataProvider="{this.languageArray}"> </mx:ComboBox>
-				<mx:CheckBox label="Disable AutoTranslation" change="toggleTranslation()"/>
+				<mx:CheckBox id="smileyCheckBox" label="Enable Smileys" change="toggleSmileys()" />
+				<mx:ComboBox id="langComboBox" dataProvider="{this.langNames}" change="changeLanguage()"> </mx:ComboBox>
+				<mx:CheckBox id="autoTransCheckBox" label="Disable AutoTranslation" change="toggleTranslation()"/>
 			</mx:HBox>
 		</mx:VBox>
 		<!--<mx:ComboBox id="participantList" dataProvider="{participants}" close="onOpenChatBox()" />	-->	    

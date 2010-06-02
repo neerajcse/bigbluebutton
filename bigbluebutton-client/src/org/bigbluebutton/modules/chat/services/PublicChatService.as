@@ -29,8 +29,8 @@ package org.bigbluebutton.modules.chat.services
 		public function sendChatMessageEvent(event:SendPublicChatMessageEvent):void {
 			trace("Receive receivedSendPublicChatMessageEvent");
 			var newMessage:String;			
-			newMessage = "<font color=\"#" + event.color + "\"><b>[" + 
-						attributes.username +" - "+ event.time + "]</b> " + event.message + "</font><br/>";			
+			newMessage = event.color + "|" +attributes.username +"|"+ event.time + "|" + event.message + "|"+event.language;
+						
 			chatSOService.sendMessage(newMessage);
 		}
 	}
