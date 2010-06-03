@@ -25,7 +25,7 @@
 			private var textColor:String="";
 			private var username:String="";
 			private var time:String="";
-			
+			private var size:int=12;
 			
 			private function updateScroll():void{
 				txtChatBox.verticalScrollPosition = txtChatBox.maxVerticalScrollPosition;
@@ -33,23 +33,41 @@
 			
 			public function showNewMessage(message:String):void
 			{
-				var arr:Array=message.split("|");
-				var g:GoogleTranslation=new GoogleTranslation();
-				g.addEventListener(GoogleApiEvent.TRANSLATION_RESULT,appendText);
-				this.textColor=arr[0].toString();
-				this.username=arr[1].toString();
-				this.time=arr[2].toString();
-				//event.color + "|" +attributes.username +"|"+ event.time + "|" + event.message + "|"+src.language+"|"+dst.lang;
-				g.translate(arr[3],arr[4],arr[5]);
+				var arr:Array=new Array();
+				arr=message.split("|");
+				if(arr.length >=5)
+				{				
+					var g:GoogleTranslation=new GoogleTranslation();
+					g.addEventListener(GoogleApiEvent.TRANSLATION_RESULT,appendText);
+					this.textColor=arr[0].toString();
+					this.username=arr[1].toString();
+					this.time=arr[2].toString();
+					this.size=arr[6].toString();
+					//event.color + "|" +attributes.username +"|"+ event.time + "|" + event.message + "|"+src.language+"|"+dst.lang;
+					Alert.show(arr[3]);
+					if(arr[4]==arr[5])
+					{
+							txtChatBox.htmlText +="<font color=\"#" + this.textColor + "\" size='"+this.size+"'><b>[" +this.username +" - "+ this.time + "]</b> " + arr[3] + "</font><br/>"; ;
+					}
+					else
+					{
+						g.translate(arr[3].toString(),arr[4].toString(),arr[5].toString());	
+						Alert.show("Request to translate from "+ arr[5]+" to "+ arr[5]);
+					}
+				}	
+				else
+				{
+					txtChatBox.htmlText +=message;
+				}
 				//txtChatBox.htmlText += message;
 				
 			}
 			
 			private function appendText(e:GoogleApiEvent):void
 			{
-				txtChatBox.htmlText +="<font color=\"#" + this.textColor + "\"><b>[" +this.username +" - "+ this.time + "]</b> " + (e.data as GoogleTranslationResult).result + "</font><br/>"; ;
+				txtChatBox.htmlText +="<font color=\"#" + this.textColor + "\" size='"+this.size+"'><b>[" +this.username +" - "+ this.time + "]</b> " + (e.data as GoogleTranslationResult).result + "</font><br/>"; ;
 				var al:Alert;
-				
+				Alert.show("done translation"+(e.data as GoogleTranslationResult).result);
 				//Alert.show( (e.data as GoogleTranslationResult).result);
 			}
 			

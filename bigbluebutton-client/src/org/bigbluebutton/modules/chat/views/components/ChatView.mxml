@@ -32,10 +32,14 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.events.CloseEvent;
+			import sfapi.commands.AlertCommands;
+			import be.boulevart.google.ajaxapi.translation.data.GoogleTranslationResult;
 			import be.boulevart.google.ajaxapi.translation.data.GoogleLanguageDetectionResult;
 			import be.boulevart.google.events.GoogleApiEvent;
-			import be.boulevart.google.ajaxapi.translation.data.GoogleTranslationResult;
+			import be.boulevart.google.GoogleApi;
 			import be.boulevart.google.ajaxapi.translation.GoogleTranslation;
+			
 			import com.asfusion.mate.events.Dispatcher;
 			
 			import flash.external.ExternalInterface;
@@ -66,10 +70,10 @@
 				'0x0088FF', '0x0000FF', '0x8800FF', '0xFF00FF'];
 			
 			
-				private var currentLangCode:String="";
+				private var currentLangCode:String="en";
 				
 				
-				private var langNames:Array=['Auto', 
+				private var langNames:Array=[ 
 										  'AFRIKAANS' , 
 	  									  'ALBANIAN' , 
 	  									  'ARABIC' , 
@@ -123,7 +127,7 @@
 										  'WELSH' ,  
 										  'YIDDISH' ]  ;
 										  
-				private var langCodes:Array=['auto',
+				private var langCodes:Array=[
 										  'af', 
 	  									  'sq', 
 	  									  'ar', 
@@ -276,10 +280,43 @@
 			{
 				var date:Date = new Date();
 				var t:String = date.toLocaleTimeString();
+				
 				return t;
 			}
 			
-			private var languageArray:Array=new Array();
+			
+			private var firstDetectionDone:Boolean=false; 
+			
+			private function detectLanguage():void
+			{
+				var g:GoogleTranslation=new GoogleTranslation();
+				var e:GoogleApiEvent
+				g.addEventListener(GoogleApiEvent.TRANSLATION_LANGUAGE_DETECTION_RESULT,languageDetected);
+				g.detectLanguage(this.txtMsg.text);
+				
+			}
+			
+			private function handleDetectNote(event:CloseEvent):void
+			{
+				if(event.detail==Alert.YES)
+				{
+					this.currentLangCode=this.tempResult.language;
+					this.langComboBox.selectedIndex=this.langCodes.indexOf(this.currentLangCode);
+				}
+				else
+				{
+					Alert.show("Please select your language manually from the drop down list","Note",Alert.OK);
+				}
+			}
+			
+			private var tempResult:GoogleLanguageDetectionResult=new GoogleLanguageDetectionResult();
+			
+			private function languageDetected(event:GoogleApiEvent):void
+			{
+				var result:GoogleLanguageDetectionResult=event.data as GoogleLanguageDetectionResult;
+				this.tempResult=result;
+				Alert.show("The language detected is "+result.language+".Is this the correct language?","Detection Complete",Alert.YES|Alert.NO,this,handleDetectNote);
+			}
 			
 			private function sendMessages():void
 			{
@@ -288,14 +325,7 @@
 				if (hasMessageToSend()){				
 					if (isChatBoxCurrentlySelected(PUBLIC_CHAT_USERID)) 
 					{						
-						if(this.autodetectLanguage==true)
-						{
-							var g:GoogleTranslation=new GoogleTranslation();
-							var e:GoogleApiEvent;
-							g.addEventListener(GoogleApiEvent.TRANSLATION_LANGUAGE_DETECTION_RESULT,showLanguage);
-							g.detectLanguage(this.txtMsg.text);
-							this.autodetectLanguage=false;
-						}
+						
 						sendPublicChatMessage();
 					} else{						
 						sendPrivateChatMessage();
@@ -304,12 +334,6 @@
 				}
 			}			
 			
-			private function showLanguage(event:GoogleApiEvent):void
-			{
-				var result:GoogleLanguageDetectionResult=event.data as GoogleLanguageDetectionResult;
-				
-				
-			}
 			
 			private function hasMessageToSend():Boolean {
 				return txtMsg.text != "";
@@ -525,7 +549,18 @@
 				}
 				
 				chatBox = getChatBoxForParticipant(sender);
-				chatBox.showNewMessage(message+"|"+this.currentLangCode);
+				if(this.autoTranslation)
+				{
+					chatBox.showNewMessage(message+"|"+this.currentLangCode+"|"+this.textSize);
+					Alert.show("AutoTranslation working");	
+				}
+				else
+				{
+					var arr:Array=new Array();
+					arr=message.split("|");
+					chatBox.showNewMessage(message+"|"+arr[4].toString()+"|"+this.textSize);
+					Alert.show("AutoTranslation disabled");	
+				}
 				
 				if (! isChatBoxCurrentlySelected(sender)) {
 					notifyParticipantOfUnreadMessageFrom(sender);
@@ -560,9 +595,17 @@
 				txtMsg.enabled = false;
 			}
 			
+			private function translationSelect():void
+			{
+				
+			}
+			
 			private function toggleTranslation():void
 			{
+				//Alert.show("Are you sure you want to disable auto translation?","Confirmation",Alert.YES|Alert.NO,this,translationSelect);
 				this.autoTranslation=!this.autoTranslation;
+				this.langComboBox.enabled=this.autoTranslation;
+				//this.currentLangCode="none";
 			}
 			
 			private function toggleSmileys():void
@@ -578,6 +621,14 @@
 				
 			}
 			
+			private var sizeArray:Array=[ 10 , 11 , 12 , 13 , 14 , 15 , 16 ];
+			
+			private var textSize:int=12;
+			
+			private function changeSize():void
+			{
+				this.textSize=this.sizeArray[this.sizeComboBox.selectedIndex];
+			}
 			
 		]]>
 	</mx:Script>
@@ -587,18 +638,20 @@
 	<mx:ApplicationControlBar id="chatCtrlBar" width="100%" height="10%">		
 		<mx:VBox height="100%" width="100%">
 			<mx:HBox width="100%">
-				<mx:TextInput id="txtMsg" width="80%" click="clearTextIfFirstClick()" enter="sendMessages()">
-					<mx:text>The first line you enter here will automatically detect your language</mx:text>
+				<mx:TextInput id="txtMsg" width="75%" click="clearTextIfFirstClick()" enter="sendMessages()">
+					
 				</mx:TextInput>
+				<mx:ComboBox id="sizeComboBox"
+					 selectedIndex="0" change="changeSize()" dataProvider="{sizeArray}"></mx:ComboBox>
 				<mx:ColorPicker id="cmpColorPicker" showTextField="false" toolTip="{ResourceUtil.getInstance().getString('bbb.chat.cmpColorPicker.toolTip')}" 
 								selectedColor="0x000000" dataProvider="{colorPickerColours}" swatchPanelStyleName="colorPickerStyle"/>
 				<mx:Button label="{ResourceUtil.getInstance().getString('bbb.chat.sendBtn')}" id="sendBtn" 
 						   toolTip="{ResourceUtil.getInstance().getString('bbb.chat.sendBtn.toolTip')}" click="sendMessages()"/>
 			</mx:HBox>
 			<mx:HBox width="100%">
-				<mx:CheckBox id="smileyCheckBox" label="Enable Smileys" change="toggleSmileys()" />
-				<mx:ComboBox id="langComboBox" dataProvider="{this.langNames}" change="changeLanguage()"> </mx:ComboBox>
-				<mx:CheckBox id="autoTransCheckBox" label="Disable AutoTranslation" change="toggleTranslation()"/>
+				<mx:CheckBox id="smileyCheckBox" label="Smileys" change="toggleSmileys()" />
+				<mx:ComboBox id="langComboBox" dataProvider="{this.langNames}" selectedIndex="12"  change="changeLanguage()"> </mx:ComboBox>
+				<mx:CheckBox id="autoTransCheckBox" selected="true" label="Translate" toolTip="Auto detect language and translate" change="toggleTranslation()"/>
 			</mx:HBox>
 		</mx:VBox>
 		<!--<mx:ComboBox id="participantList" dataProvider="{participants}" close="onOpenChatBox()" />	-->	    
