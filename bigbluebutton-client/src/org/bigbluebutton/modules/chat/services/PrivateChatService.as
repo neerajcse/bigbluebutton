@@ -32,8 +32,7 @@ package org.bigbluebutton.modules.chat.services
 		public function sendChatMessageEvent(event:SendPrivateChatMessageEvent):void {
 			trace("Receive receivedSendPrivateChatMessageEvent");
 			var newMessage:String;			
-			newMessage = "<font color=\"#" + event.color + "\"><b>[" + 
-						attributes.username +" - "+ event.time + "]</b> " + event.message + "</font><br/>";
+			newMessage = event.color + "|" +attributes.username +"|"+ event.time + "|" + event.message + "|"+event.language+"|"+event.offset;
 			var messageVO:MessageVO = new MessageVO(newMessage, attributes.userid, event.toUser);
 			chatSOService.sendMessage(messageVO);
 		}

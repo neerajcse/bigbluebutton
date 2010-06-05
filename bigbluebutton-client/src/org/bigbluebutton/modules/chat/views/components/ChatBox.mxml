@@ -26,6 +26,10 @@
 			private var username:String="";
 			private var time:String="";
 			private var size:int=12;
+			private var message:String="";
+			private var myOffset:String="";
+			private var offset:String="";
+			
 			
 			private function updateScroll():void{
 				txtChatBox.verticalScrollPosition = txtChatBox.maxVerticalScrollPosition;
@@ -41,18 +45,29 @@
 					g.addEventListener(GoogleApiEvent.TRANSLATION_RESULT,appendText);
 					this.textColor=arr[0].toString();
 					this.username=arr[1].toString();
+					this.message=arr[3].toString();
 					this.time=arr[2].toString();
-					this.size=arr[6].toString();
+					this.offset=arr[5].toString();
+					this.size=arr[7].toString();
+					this.myOffset=arr[8].toString();
 					//event.color + "|" +attributes.username +"|"+ event.time + "|" + event.message + "|"+src.language+"|"+dst.lang;
-					Alert.show(arr[3]);
+					//Alert.show(arr[3]);
 					if(arr[4]==arr[5])
 					{
-							txtChatBox.htmlText +="<font color=\"#" + this.textColor + "\" size='"+this.size+"'><b>[" +this.username +" - "+ this.time + "]</b> " + arr[3] + "</font><br/>"; ;
+							var i:int=parseInt(this.myOffset)-parseInt(this.offset);
+							var finalOffSet:String=i.toString();
+							txtChatBox.htmlText +="<font color=\"#" + this.textColor + "\" size='"+this.size+"'><b>[" +this.username +" - "+ this.time + "]</b> " + parseURLs(cleanup(arr[3].toString())) + "</font><br/>" + 
+													"<font color='#777777' size='8'><b>[" +finalOffSet+" - "+ this.currentTime().toString() + "]</b> " + parseURLs(cleanup(arr[3].toString())) + "</font><br/>";
+							
+							
+							
+							
+							
 					}
 					else
 					{
-						g.translate(arr[3].toString(),arr[4].toString(),arr[5].toString());	
-						Alert.show("Request to translate from "+ arr[5]+" to "+ arr[5]);
+						g.translate(arr[3].toString(),arr[4].toString(),arr[6].toString());	
+						//Alert.show("Request to translate from "+ arr[4]+" to "+ arr[6]);
 					}
 				}	
 				else
@@ -65,9 +80,13 @@
 			
 			private function appendText(e:GoogleApiEvent):void
 			{
-				txtChatBox.htmlText +="<font color=\"#" + this.textColor + "\" size='"+this.size+"'><b>[" +this.username +" - "+ this.time + "]</b> " + (e.data as GoogleTranslationResult).result + "</font><br/>"; ;
+				var i:int=parseInt(this.myOffset)-parseInt(this.offset);
+				var finalOffSet:String=i.toString();
+				var message:String="<font color=\"#" + this.textColor + "\" size='"+this.size+"'><b>[" +this.username +" - "+ this.time + "]</b> " + parseURLs(cleanup((e.data as GoogleTranslationResult).result)) + "</font><br/>" + 
+						"<font color='#777777' size='8'><b>[" + finalOffSet+" - "+ this.currentTime().toString() + "]</b> " + parseURLs(cleanup(this.message)) + "</font><br/>";
+				txtChatBox.htmlText +=message;
 				var al:Alert;
-				Alert.show("done translation"+(e.data as GoogleTranslationResult).result);
+				//Alert.show("done translation"+(e.data as GoogleTranslationResult).result);
 				//Alert.show( (e.data as GoogleTranslationResult).result);
 			}
 			
@@ -76,6 +95,37 @@
 				backgroundColor = 0xFFFF00;
 			}
 			
+			private function cleanup(message:String):String
+			{
+				var parsedString:String = message.replace('<', '&#60;');
+				parsedString = parsedString.replace('>', '&#62;');
+				
+				return parsedString;
+			}
+			
+			private function parseURLs(message:String):String
+			{
+				var indexOfHTTP:Number = message.indexOf("http://");
+				var indexOfWWW:Number = message.indexOf("www.");
+				if (indexOfHTTP == -1 && indexOfWWW == -1) return message;
+				
+				var words:Array = message.split(" ");
+				var parsedString:String = "";
+				
+				for (var n:Number = 0; n<words.length; n++){
+					var word:String = words[n] as String;
+					if (word.indexOf("http://") != -1) parsedString += '<a href="event:' + word + '"> <u>' + word + '</u></a> ';
+					else if (word.indexOf("www.") != -1) parsedString += '<a href="event:http://' + word + '"> <u>' + word + '</u></a> ';
+					else parsedString += word + ' ';
+				}
+				return parsedString;
+			}
+			
+			private function parseSmileys(message:String):String
+			{
+				message=message.replace(':)',"<img src='http://www.greetings.ca/smiley.jpg' height='12' width='12' alt='smiles'></img>"); 
+				return message;
+			}
 			public function setMessageRead():void{
 				this.read = true;
 				backgroundColor = 0x000000;
@@ -88,6 +138,14 @@
 			
 			private function changeFontSize(e:ChatOptionsEvent):void{
 				this.setStyle("fontSize", e.fontSize);
+			}
+			
+			private function currentTime() : String
+			{
+				var date:Date = new Date();
+				var t:String = date.toLocaleTimeString();
+				
+				return t;
 			}
 		
 			

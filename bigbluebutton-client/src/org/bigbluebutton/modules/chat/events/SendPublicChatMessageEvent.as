@@ -10,6 +10,7 @@ package org.bigbluebutton.modules.chat.events
 		public var time:String;
 		public var color:String;
 		public var language:String;
+		public var offset:String;
 		
 		public function SendPublicChatMessageEvent(type:String, bubbles:Boolean=true, cancelable:Boolean=false)
 		{

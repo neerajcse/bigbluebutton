@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:mate="http://mate.asfusion.com/" backgroundColor="#000000"
+		 xmlns:mate="http://mate.asfusion.com/" 
 		 creationComplete="onCreationComplete()"
 		 xmlns:flexlib="http://code.google.com/p/flexlib/"
 		 width="100%" height="100%" xmlns:containers="flexlib.containers.*">
@@ -10,6 +10,8 @@
 	<mate:Listener type="{ParticipantJoinEvent.PARTICIPANT_JOINED_EVENT}" method="handleParticipantJoinedEvent"/>
 	<mate:Listener type="{BBBEvent.SEND_PUBLIC_CHAT_MESSAGE_EVENT}" method="sendMessageReceivedFromBBBEvent"/> 
 	<mate:Listener type="{ChatOptionsEvent.CHANGE_FONT_SIZE}" method="changeFontSize" />
+	<mate:Listener type="{ChatOptionsEvent.CHANGE_LANGUAGE}" method="changeLanguage" />
+	<mate:Listener type="{ChatOptionsEvent.TOGGLE_TRANSLATE}" method="toggleTranslation" />
 	
 	<mx:Style>
 		.colorPickerStyle {
@@ -32,6 +34,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.asfusion.mate.actions.DataCopier;
 			import mx.events.CloseEvent;
 			import sfapi.commands.AlertCommands;
 			import be.boulevart.google.ajaxapi.translation.data.GoogleTranslationResult;
@@ -73,121 +76,7 @@
 				private var currentLangCode:String="en";
 				
 				
-				private var langNames:Array=[ 
-										  'AFRIKAANS' , 
-	  									  'ALBANIAN' , 
-	  									  'ARABIC' , 
-	  									  'BELARUSIAN' , 
-										  'BULGARIAN' , 
-										  'CATALAN' , 
-										  'CHINESE' , 
-										  'CHINESE_SIMPLIFIED' , 
-										  'CHINESE_TRADITIONAL' , 
-										  'CZECH' ,  
-										  'DANISH' , 
-										  'DUTCH',   
-										  'ENGLISH' , 
-										  'ESTONIAN' , 
-										  'FILIPINO' , 
-										  'FINNISH' , 
-										  'FRENCH' ,  
-										  'GALICIAN' , 
-										  'GERMAN' , 
-										  'GREEK' , 
-										  'HEBREW' , 
-										  'HINDI' , 
-										  'HUNGARIAN' , 
-										  'ICELANDIC' , 
-										  'INDONESIAN' , 
-										  'IRISH' , 
-										  'ITALIAN' , 
-										  'JAPANESE' , 
-										  'KOREAN' , 
-										  'LATVIAN' , 
-										  'LITHUANIAN' , 
-										  'MACEDONIAN' , 
-										  'MALAY' , 
-										  'MALTESE' , 
-										  'NORWEGIAN' , 
-										  'PERSIAN' , 
-										  'POLISH' , 
-										  'PORTUGUESE' , 
-										  'ROMANIAN' , 
-										  'RUSSIAN' , 
-										  'SERBIAN' , 
-										  'SLOVAK' , 
-										  'SLOVENIAN' , 
-										  'SPANISH' , 
-										  'SWAHILI' , 
-										  'SWEDISH' , 
-										  'THAI' , 
-										  'TURKISH' , 
-										  'UKRAINIAN' , 
-										  'VIETNAMESE' , 
-										  'WELSH' ,  
-										  'YIDDISH' ]  ;
-										  
-				private var langCodes:Array=[
-										  'af', 
-	  									  'sq', 
-	  									  'ar', 
-	  									  'be', 
-										  'bg', 
-										  'ca', 
-										  'zh', 
-										  'zh-CN', 
-										  'zh-TW', 
-										  'cs', 
-										  'da', 
-										  'nl',   
-										  'en', 
-										  'et', 
-										  'tl', 
-										  'fi', 
-										  'fr', 
-										  'gl', 
-										  'de', 
-										  'el', 
-										  'iw', 
-										  'hi', 
-										  'hu', 
-										  'is', 
-										  'id', 
-										  'ga', 
-										  'it', 
-										  'ja', 
-										  'ko', 
-										  'lv', 
-										  'lt', 
-										  'mk', 
-										  'ms', 
-										  'mt', 
-										  'no', 
-										  'fa', 
-										  'pl', 
-										  'pt-PT', 
-										  'ro', 
-										  'ru', 
-										  'sr', 
-										  'sk', 
-										  'sl', 
-										  'es', 
-										  'sw', 
-										  'sv', 
-										  'th', 
-										  'tr', 
-										  'uk', 
-										  'vi', 
-										  'cy', 
-										  'yi']  ;
-										  
-
-
-
-
-
-
-			
+						
 			
 			private static const PUBLIC_CHAT_USERID:String = '0';
 			private static const PUBLIC_CHAT_USERNAME:String = ResourceUtil.getInstance().getString("bbb.chat.publicChatUsername");
@@ -284,6 +173,19 @@
 				return t;
 			}
 			
+			private function currentTimeOffset():String
+			{
+				
+				
+				
+				var date:Date = new Date();
+				var t:String = date.getTimezoneOffset().toString();
+				//Alert.show(t);
+				
+				
+				return t;
+			}
+			
 			
 			private var firstDetectionDone:Boolean=false; 
 			
@@ -301,7 +203,7 @@
 				if(event.detail==Alert.YES)
 				{
 					this.currentLangCode=this.tempResult.language;
-					this.langComboBox.selectedIndex=this.langCodes.indexOf(this.currentLangCode);
+					
 				}
 				else
 				{
@@ -315,7 +217,7 @@
 			{
 				var result:GoogleLanguageDetectionResult=event.data as GoogleLanguageDetectionResult;
 				this.tempResult=result;
-				Alert.show("The language detected is "+result.language+".Is this the correct language?","Detection Complete",Alert.YES|Alert.NO,this,handleDetectNote);
+				//Alert.show("The language detected is "+result.language+".Is this the correct language?","Detection Complete",Alert.YES|Alert.NO,this,handleDetectNote);
 			}
 			
 			private function sendMessages():void
@@ -350,7 +252,8 @@
 				return parsedString;
 			}
 			
-			private function parseURLs(message:String):String{
+			private function parseURLs(message:String):String
+			{
 				var indexOfHTTP:Number = message.indexOf("http://");
 				var indexOfWWW:Number = message.indexOf("www.");
 				if (indexOfHTTP == -1 && indexOfWWW == -1) return message;
@@ -367,12 +270,14 @@
 				return parsedString;
 			}
 			
-			private function sendPublicChatMessage():void {
+			private function sendPublicChatMessage():void 
+			{
 				trace("Sending public chat message");
 				var publicEvent:SendPublicChatMessageEvent = new SendPublicChatMessageEvent(SendPublicChatMessageEvent.SEND_PUBLIC_CHAT_MESSAGE_EVENT);
-				publicEvent.message = parseURLs(cleanup(txtMsg.text));
+				publicEvent.message = txtMsg.text;
 				publicEvent.color = cmpColorPicker.selectedColor.toString(16);
 				publicEvent.time = currentTime();
+				publicEvent.offset=this.currentTimeOffset();
 				publicEvent.language=this.currentLangCode;
 				localDispatcher.dispatchEvent(publicEvent);
 			}
@@ -386,10 +291,12 @@
 			private function sendPrivateChatMessage():void {
 				trace("Sending private chat message");
 				var privateEvent:SendPrivateChatMessageEvent = new SendPrivateChatMessageEvent(SendPrivateChatMessageEvent.SEND_PRIVATE_CHAT_MESSAGE_EVENT);
-				privateEvent.message = parseURLs(cleanup(txtMsg.text));
+				privateEvent.message = txtMsg.text;
 				privateEvent.toUser = chatTabs.selectedChild.name;
 				privateEvent.color = cmpColorPicker.selectedColor.toString(16);
 				privateEvent.time = currentTime();
+				privateEvent.language=this.currentLangCode;
+				privateEvent.offset=this.currentTimeOffset();
 				localDispatcher.dispatchEvent(privateEvent);
 			}
 			
@@ -551,15 +458,15 @@
 				chatBox = getChatBoxForParticipant(sender);
 				if(this.autoTranslation)
 				{
-					chatBox.showNewMessage(message+"|"+this.currentLangCode+"|"+this.textSize);
-					Alert.show("AutoTranslation working");	
+					chatBox.showNewMessage(message+"|"+this.currentLangCode+"|"+this.textSize+"|"+this.currentTimeOffset());
+					//Alert.show("AutoTranslation working");	
 				}
 				else
 				{
 					var arr:Array=new Array();
 					arr=message.split("|");
-					chatBox.showNewMessage(message+"|"+arr[4].toString()+"|"+this.textSize);
-					Alert.show("AutoTranslation disabled");	
+					chatBox.showNewMessage(message+"|"+arr[4].toString()+"|"+this.textSize+"|"+this.currentTimeOffset());
+					//Alert.show("AutoTranslation disabled");	
 				}
 				
 				if (! isChatBoxCurrentlySelected(sender)) {
@@ -569,7 +476,11 @@
 			
 			public function changeFontSize(e:ChatOptionsEvent):void{
 				txtMsg.setStyle("fontSize", e.fontSize);
+				this.textSize=e.fontSize;
+				
 			}
+			
+			
 			
 			private function onTabClose(e:SuperTabEvent):void{
 				dispatchEvent(e);
@@ -600,11 +511,11 @@
 				
 			}
 			
-			private function toggleTranslation():void
+			private function toggleTranslation(e:ChatOptionsEvent):void
 			{
 				//Alert.show("Are you sure you want to disable auto translation?","Confirmation",Alert.YES|Alert.NO,this,translationSelect);
 				this.autoTranslation=!this.autoTranslation;
-				this.langComboBox.enabled=this.autoTranslation;
+				
 				//this.currentLangCode="none";
 			}
 			
@@ -613,47 +524,36 @@
 				this.enableSmileys=!this.enableSmileys;
 			}
 			
-			private function changeLanguage():void
-			{
-				
-				this.currentLangCode=this.langCodes[this.langComboBox.selectedIndex].toString();
-				Alert.show(this.currentLangCode);
-				
-			}
 			
-			private var sizeArray:Array=[ 10 , 11 , 12 , 13 , 14 , 15 , 16 ];
+			
+			private var sizeArray:Array=[ 12 , 13 , 14 , 15 , 16, 17 , 18 ];
 			
 			private var textSize:int=12;
 			
-			private function changeSize():void
+			private function changeLanguage(e:ChatOptionsEvent):void
 			{
-				this.textSize=this.sizeArray[this.sizeComboBox.selectedIndex];
+				this.currentLangCode=e.language;
 			}
 			
 		]]>
 	</mx:Script>
-	<containers:SuperTabNavigator id="chatTabs" width="100%" height="80%" change="onTabNavChange()" tabClose="onTabClose(event)" minTabWidth="20" 
+	<containers:SuperTabNavigator id="chatTabs" width="100%" height="90%" change="onTabNavChange()" tabClose="onTabClose(event)" minTabWidth="20" 
 								  dragEnabled="false" popUpButtonPolicy="off"/>
 	
 	<mx:ApplicationControlBar id="chatCtrlBar" width="100%" height="10%">		
-		<mx:VBox height="100%" width="100%">
+		
 			<mx:HBox width="100%">
 				<mx:TextInput id="txtMsg" width="75%" click="clearTextIfFirstClick()" enter="sendMessages()">
 					
 				</mx:TextInput>
-				<mx:ComboBox id="sizeComboBox"
-					 selectedIndex="0" change="changeSize()" dataProvider="{sizeArray}"></mx:ComboBox>
+				
 				<mx:ColorPicker id="cmpColorPicker" showTextField="false" toolTip="{ResourceUtil.getInstance().getString('bbb.chat.cmpColorPicker.toolTip')}" 
 								selectedColor="0x000000" dataProvider="{colorPickerColours}" swatchPanelStyleName="colorPickerStyle"/>
 				<mx:Button label="{ResourceUtil.getInstance().getString('bbb.chat.sendBtn')}" id="sendBtn" 
 						   toolTip="{ResourceUtil.getInstance().getString('bbb.chat.sendBtn.toolTip')}" click="sendMessages()"/>
 			</mx:HBox>
-			<mx:HBox width="100%">
-				<mx:CheckBox id="smileyCheckBox" label="Smileys" change="toggleSmileys()" />
-				<mx:ComboBox id="langComboBox" dataProvider="{this.langNames}" selectedIndex="12"  change="changeLanguage()"> </mx:ComboBox>
-				<mx:CheckBox id="autoTransCheckBox" selected="true" label="Translate" toolTip="Auto detect language and translate" change="toggleTranslation()"/>
-			</mx:HBox>
-		</mx:VBox>
+			
+		
 		<!--<mx:ComboBox id="participantList" dataProvider="{participants}" close="onOpenChatBox()" />	-->	    
 	</mx:ApplicationControlBar>	
 </mx:VBox>

@@ -11,7 +11,117 @@
 			
 			[Bindable] public var participants:ArrayCollection;
 			[Bindable] public var chatView:ChatView;
-			[Bindable] private var fontSizes:Array = ['8', '10', '12', '14', '16', '18'];
+			[Bindable] private var fontSizes:Array = ['10', '12', '14', '16', '18','19'];
+			
+			
+			private var langNames:Array=[ 
+										  'AFRIKAANS' , 
+	  									  'ALBANIAN' , 
+	  									  'ARABIC' , 
+	  									  'BELARUSIAN' , 
+										  'BULGARIAN' , 
+										  'CATALAN' , 
+										  'CHINESE' , 
+										  'CHINESE_SIMPLIFIED' , 
+										  'CHINESE_TRADITIONAL' , 
+										  'CZECH' ,  
+										  'DANISH' , 
+										  'DUTCH',   
+										  'ENGLISH' , 
+										  'ESTONIAN' , 
+										  'FILIPINO' , 
+										  'FINNISH' , 
+										  'FRENCH' ,  
+										  'GALICIAN' , 
+										  'GERMAN' , 
+										  'GREEK' , 
+										  'HEBREW' , 
+										  'HINDI' , 
+										  'HUNGARIAN' , 
+										  'ICELANDIC' , 
+										  'INDONESIAN' , 
+										  'IRISH' , 
+										  'ITALIAN' , 
+										  'JAPANESE' , 
+										  'KOREAN' , 
+										  'LATVIAN' , 
+										  'LITHUANIAN' , 
+										  'MACEDONIAN' , 
+										  'MALAY' , 
+										  'MALTESE' , 
+										  'NORWEGIAN' , 
+										  'PERSIAN' , 
+										  'POLISH' , 
+										  'PORTUGUESE' , 
+										  'ROMANIAN' , 
+										  'RUSSIAN' , 
+										  'SERBIAN' , 
+										  'SLOVAK' , 
+										  'SLOVENIAN' , 
+										  'SPANISH' , 
+										  'SWAHILI' , 
+										  'SWEDISH' , 
+										  'THAI' , 
+										  'TURKISH' , 
+										  'UKRAINIAN' , 
+										  'VIETNAMESE' , 
+										  'WELSH' ,  
+										  'YIDDISH' ]  ;
+										  
+				private var langCodes:Array=[
+										  'af', 
+	  									  'sq', 
+	  									  'ar', 
+	  									  'be', 
+										  'bg', 
+										  'ca', 
+										  'zh', 
+										  'zh-CN', 
+										  'zh-TW', 
+										  'cs', 
+										  'da', 
+										  'nl',   
+										  'en', 
+										  'et', 
+										  'tl', 
+										  'fi', 
+										  'fr', 
+										  'gl', 
+										  'de', 
+										  'el', 
+										  'iw', 
+										  'hi', 
+										  'hu', 
+										  'is', 
+										  'id', 
+										  'ga', 
+										  'it', 
+										  'ja', 
+										  'ko', 
+										  'lv', 
+										  'lt', 
+										  'mk', 
+										  'ms', 
+										  'mt', 
+										  'no', 
+										  'fa', 
+										  'pl', 
+										  'pt-PT', 
+										  'ro', 
+										  'ru', 
+										  'sr', 
+										  'sk', 
+										  'sl', 
+										  'es', 
+										  'sw', 
+										  'sv', 
+										  'th', 
+										  'tr', 
+										  'uk', 
+										  'vi', 
+										  'cy', 
+										  'yi']  ;
+			
 			
 			private function init():void{
 				participants = new ArrayCollection();
@@ -30,6 +140,21 @@
 				e.fontSize = int(cmbFontSize.selectedItem);
 				dispatchEvent(e);
 			}
+			
+			private function changeLanguage():void
+			{
+				var e:ChatOptionsEvent = new ChatOptionsEvent(ChatOptionsEvent.CHANGE_LANGUAGE);
+				e.language=this.langCodes[this.langComboBox.selectedIndex];
+				dispatchEvent(e);
+			}
+			
+			private function toggleTranslation():void
+			{
+			
+				var e:ChatOptionsEvent=new ChatOptionsEvent(ChatOptionsEvent.TOGGLE_TRANSLATE);	
+				dispatchEvent(e);
+			}
+			
 
 		]]>
 	</mx:Script>
@@ -46,6 +171,8 @@
 				<mx:Label text="Font Size" />
 				<mx:ComboBox width="60" id="cmbFontSize" dataProvider="{fontSizes}" close="changeFontSize()" />
 			</mx:HBox>
+			<mx:ComboBox id="langComboBox" dataProvider="{this.langNames}" selectedIndex="12"  change="changeLanguage()"> </mx:ComboBox>
+			<mx:CheckBox id="autoTransCheckBox" selected="true" label="AutoTranslate" toolTip="Auto detect language and translate" change="toggleTranslation()"/>
 		</mx:VBox>
 	</mx:HBox>
 	
