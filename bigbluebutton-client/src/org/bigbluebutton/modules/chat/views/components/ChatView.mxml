@@ -168,7 +168,8 @@
 			private function currentTime() : String
 			{
 				var date:Date = new Date();
-				var t:String = date.toLocaleTimeString();
+				
+				var t:String = date.getHours()+":"+date.getMinutes();
 				
 				return t;
 			}

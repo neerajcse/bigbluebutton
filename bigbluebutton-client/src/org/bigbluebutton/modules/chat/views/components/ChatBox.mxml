@@ -82,12 +82,28 @@
 			{
 				var i:int=parseInt(this.myOffset)-parseInt(this.offset);
 				var finalOffSet:String=i.toString();
-				var message:String="<font color=\"#" + this.textColor + "\" size='"+this.size+"'><b>[" +this.username +" - "+ this.time + "]</b> " + parseURLs(cleanup((e.data as GoogleTranslationResult).result)) + "</font><br/>" + 
+				var message:String="<font size='" + this.size + "' color='#"+this.textColor+"'><b>[" +this.username +" - "+ this.time + "]</b> " + parseURLs(cleanup((e.data as GoogleTranslationResult).result)) + "</font><br/>" + 
 						"<font color='#777777' size='8'><b>[" + finalOffSet+" - "+ this.currentTime().toString() + "]</b> " + parseURLs(cleanup(this.message)) + "</font><br/>";
 				txtChatBox.htmlText +=message;
 				var al:Alert;
 				//Alert.show("done translation"+(e.data as GoogleTranslationResult).result);
 				//Alert.show( (e.data as GoogleTranslationResult).result);
+			}
+			
+			private function changeSizeForAll(size:String):void
+			{
+				var str:String=this.txtChatBox.htmlText;
+				//<FONT FACE="Verdana" SIZE="12" 
+				var pattern:RegExp = /<FONT FACE="Verdana" SIZE="[0-9][0-9]" /g;
+				//Alert.show("Changing font size for everything");
+				this.txtChatBox.htmlText="";
+				str=str.replace(pattern,'<FONT FACE="Verdana" SIZE="'+size+'" ');
+				
+				this.txtChatBox.htmlText=str;
+				
+				//Alert.show(str);
+				
+				
 			}
 			
 			public function setMessageUnread():void{
@@ -136,14 +152,17 @@
 				navigateToURL(url, '_blank');
 			}
 			
-			private function changeFontSize(e:ChatOptionsEvent):void{
+			private function changeFontSize(e:ChatOptionsEvent):void
+			{
 				this.setStyle("fontSize", e.fontSize);
+				
+				this.changeSizeForAll(e.fontSize.toString());
 			}
 			
 			private function currentTime() : String
 			{
 				var date:Date = new Date();
-				var t:String = date.toLocaleTimeString();
+				var t:String = date.getHours()+":"+date.getMinutes();
 				
 				return t;
 			}
