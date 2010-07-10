@@ -30,6 +30,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.resources.ResourceManager;
 			import mx.managers.HistoryManager;
 			import mx.managers.IDragManager;
 			
@@ -44,6 +45,9 @@
 		 */
 		private var iDragManager:IDragManager;  
 			
+			
+		
+		
 		/** another workaround - for this issue: https://bugs.adobe.com/jira/browse/SDK-13121*/
 		private var hist:HistoryManager
 				
@@ -54,7 +58,7 @@
 		private function handleChatEvent(e:Event):void {
 			trace('Got CHAT_EVENT');
 		}
-
+		
 		]]>
 	</mx:Script>		
 	<maps:ApplicationEventMap />	
